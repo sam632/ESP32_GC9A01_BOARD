@@ -116,11 +116,6 @@ void MQTTcallback(char* topic, byte* payload, unsigned int length) {
   for (int i = 0; i < length; i++) {
     message += (char)payload[i];
   }
-
-  if (strcmp(topic, tempTopic) == 0) {
-    temperature = message;
-    updateTemp(tempSprite, tft, power, temperature);
-  }
   if (strcmp(topic, humTopic) == 0) {
     humidity = message;
     updateHumidity(humSprite, power, humidity);
@@ -196,6 +191,9 @@ void loop() {
     timeNow = getLocalTime();
     updateTime(timeSprite, power, timeNow);
 
+    temperature = String(bmp.readTemperature(), 1);
+    updateTemp(tempSprite, tft, power, temperature);
+  
     Serial.print("Temperature  = ");
     Serial.println(bmp.readTemperature());
     Serial.print("Pressure = ");
