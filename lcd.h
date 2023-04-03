@@ -1,6 +1,18 @@
 #include <SPI.h>
 #include <TFT_eSPI.h>
+#include <time.h>
 #include "custom_fonts.h"
+
+String getLocalTime() {
+
+  struct tm timeinfo;
+  char timeNow[6];
+  if (!getLocalTime(&timeinfo)) {
+    return "Err";
+  }
+  strftime(timeNow, 6, "%H:%M", &timeinfo);
+  return timeNow;
+}
 
 void fillArc(TFT_eSPI &tft, int x, int y, int start_angle, int seg_count, int rx, int ry, int w, unsigned int colour)
 {
@@ -65,13 +77,13 @@ void initDisplay(TFT_eSPI &tft) {
   tft.fillTriangle(240 - rect_x, 240, 240 - rect_x - 3, rect_y + 2, 240 - rect_x + t_offset, 240, CLOCK_BG);
 }
 
-void updateTempDial(TFT_eSPI &tft, String temperature) {
+void updateTempDial(TFT_eSPI &tft, float temperature) {
 
     int max_seg = 47;
     float temp_range = 20.0;
 
     fillArc(tft, 120, 120, 216, max_seg, 112, 112, 14, BACKGROUND);
-    int arc = (int)(::atof(temperature.c_str()) - 10) * max_seg/ temp_range;
+    int arc = (int)(temperature - 10) * max_seg/ temp_range;
     if( arc > max_seg ) {
       arc = max_seg;
     }
@@ -85,7 +97,7 @@ void updateTempDial(TFT_eSPI &tft, String temperature) {
     fillArc(tft, 120, 120, 216, arc, 110, 110, 10, colour);
 }
 
-void updateTemp(TFT_eSprite &sprite, TFT_eSPI &tft, bool power, String temperature) {
+void updateTemp(TFT_eSprite &sprite, TFT_eSPI &tft, bool power, float temperature) {
 
   if (power) {
     sprite.createSprite(113, 55);
@@ -95,7 +107,7 @@ void updateTemp(TFT_eSprite &sprite, TFT_eSPI &tft, bool power, String temperatu
     sprite.setFreeFont(&Roboto_Black_50);
     sprite.setTextColor(TEXT_COLOUR, BACKGROUND);
 
-    sprite.drawString(temperature, 3, 3);
+    sprite.drawString(String(temperature, 1), 3, 3);
     sprite.pushSprite(38, 70);
     sprite.deleteSprite();
 
@@ -119,7 +131,7 @@ void updateHumidity(TFT_eSprite &sprite, bool power, String humidity) {
   }
 }
 
-void updateTime(TFT_eSprite &sprite, bool power, String curr_time) {
+void updateTime(TFT_eSprite &sprite, bool power) {
 
   if (power) {
     sprite.createSprite(92, 27);
@@ -127,7 +139,8 @@ void updateTime(TFT_eSprite &sprite, bool power, String curr_time) {
     sprite.setTextColor(TFT_WHITE, CLOCK_BG);
     sprite.setFreeFont(&DSEG7_Classic_Mini_Regular_26);
 
-    sprite.drawString(curr_time, 0, 0);
+    String timeNow = getLocalTime();
+    sprite.drawString(timeNow, 0, 0);
     sprite.pushSprite(73, 200);
     sprite.deleteSprite();
   }

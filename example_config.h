@@ -1,5 +1,6 @@
 #pragma once
 
+#define DEVICE_NAME   "LCD Display"
 #define WIFI_SSID     "<WiFi-SSID>"
 #define WIFI_PASSWORD "<WiFi-PASSWORD>"
 #define MQTT_USER     "<MQTT-USERNAME>"
