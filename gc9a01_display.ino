@@ -1,6 +1,5 @@
 /*
   - Home Assistant send unavailble
-  - Add the arc to sprite and add ball to end
   - Refactor
 */
 
@@ -22,14 +21,12 @@ const long gmtOffset_sec = 0;
 const int daylightOffset_sec = 3600;
 
 // Screen vars
-bool power = true;
-float temperature = 0.0;
-String humidity = "00";
-
 TFT_eSPI tft = TFT_eSPI();
 TFT_eSprite tempSprite = TFT_eSprite(&tft);
 TFT_eSprite humSprite = TFT_eSprite(&tft);
 TFT_eSprite timeSprite = TFT_eSprite(&tft);
+TFT_eSprite arcSprite = TFT_eSprite(&tft);
+TFT_eSprite background = TFT_eSprite(&tft);
 
 // BMP280 vars
 TwoWire I2CBME = TwoWire(0);
@@ -49,33 +46,16 @@ void MQTTcallback(char* topic, byte* payload, unsigned int length) {
     message += (char)payload[i];
   }
   if (strcmp(topic, humTopic) == 0) {
-    humidity = message;
-    updateHumidity(humSprite, power, humidity);
+    updateHumidity(humSprite, message);
   }
   if (strcmp(topic, bklcmdTopic) == 0) {
-    backlightToggle(message);
+    backlightToggle(client, bklstateTopic, message);
   }
-}
-
-void backlightToggle(String state) {
-
-  if (state == "ON") {
-    power = true;
-    digitalWrite(TFT_BL, HIGH);
-    initDisplay(tft);
-    updateTemp(tempSprite, tft, power, temperature);
-    updateHumidity(humSprite, power, humidity);
-    updateTime(timeSprite, power);
-  }
-  if (state == "OFF") {
-    power = false;
-    digitalWrite(TFT_BL, LOW);
-    tft.fillScreen(TFT_BLACK);
-  }
-  client.publish(bklstateTopic, state.c_str());
 }
 
 void setup(void) {
+
+  Serial.begin(115200);
 
   tft.init();
   tft.setRotation(0);
@@ -90,7 +70,8 @@ void setup(void) {
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
   pinMode(TFT_BL, OUTPUT);
-  backlightToggle("ON");
+  backlightToggle(client, bklstateTopic, "ON");
+  initDisplay(background, arcSprite, timeSprite, tempSprite, humSprite);
 
   targetTime = millis() + 3000;
 }
@@ -106,10 +87,13 @@ void loop() {
   if (targetTime < millis()) {
     // Set next update for 3 second later
     targetTime = millis() + 3000;
-    updateTime(timeSprite, power);
+    updateTime(timeSprite);
 
-    temperature = bmp.readTemperature();
-    updateTemp(tempSprite, tft, power, temperature);
+    float temperature = bmp.readTemperature();
+    updateTemp(tempSprite, temperature);
+    updateTempDial(arcSprite, temperature);
     pushToHA(client, temperature, bmp.readPressure());
   }
+
+  updateScreen(background, arcSprite, timeSprite, tempSprite, humSprite);
 }
