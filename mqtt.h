@@ -90,7 +90,7 @@ void pushToHA(PubSubClient &client, float temperature, float pressure) {
   DynamicJsonDocument doc(1024);
 
   doc["temperature"] = round(temperature*10) / 10.0;
-  doc["pressure"] = pressure;
+  doc["pressure"] = round(pressure/10) / 10.0;
 
   size_t n = serializeJson(doc, buffer);
 
