@@ -96,3 +96,14 @@ void pushToHA(PubSubClient &client, float temperature, float pressure) {
 
   client.publish(sensorstateTopic, buffer);
 }
+
+void backlightToggle(PubSubClient &client, const char* topic, String state) {
+
+  if (state == "ON") {
+    digitalWrite(TFT_BL, HIGH);
+  }
+  if (state == "OFF") {
+    digitalWrite(TFT_BL, LOW);
+  }
+  client.publish(topic, state.c_str());
+}
