@@ -1,4 +1,3 @@
-#include <PubSubClient.h>
 #include <SPI.h>
 #include <TFT_eSPI.h>
 #include <time.h>
@@ -150,15 +149,4 @@ void updateScreen(TFT_eSprite &background, TFT_eSprite &arcSprite, TFT_eSprite &
   arcSprite.pushToSprite(&background, 0, 0, TFT_TRANSPARENT);
 
   background.pushSprite(0, 0);
-}
-
-void backlightToggle(PubSubClient &client, const char* topic, String state) {
-
-  if (state == "ON") {
-    digitalWrite(TFT_BL, HIGH);
-  }
-  if (state == "OFF") {
-    digitalWrite(TFT_BL, LOW);
-  }
-  client.publish(topic, state.c_str());
 }

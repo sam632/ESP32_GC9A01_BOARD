@@ -32,7 +32,7 @@ TFT_eSprite background = TFT_eSprite(&tft);
 TwoWire I2CBME = TwoWire(0);
 Adafruit_BMP280 bmp(&I2CBME);
 
-void initMQTT(PubSubClient &client) {
+void initMQTT(PubSubClient &client, const char* humTopic, const char* bklcmdTopic) {
 
   client.setServer(MQTT_SERVER, 1883);
   client.setCallback(MQTTcallback);
@@ -63,7 +63,7 @@ void setup(void) {
   tft.fillScreen(BACKGROUND);
 
   initWiFi();
-  initMQTT(client);
+  initMQTT(client, humTopic, bklcmdTopic);
   initOTA();
   initBMP(I2CBME, bmp);
 
