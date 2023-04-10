@@ -71,7 +71,7 @@ void sendMQTTDiscoveryMsg(PubSubClient &client, String name, String unit) {
   client.publish(topic.c_str(), buffer, n);
 }
 
-void reconnectMQTT(PubSubClient &client, const char* humTopic, const char* bklcmdTopic) {
+void reconnectMQTT(PubSubClient &client) {
 
   int i = 0;
   while (!client.connected()) {
@@ -98,6 +98,12 @@ void reconnectMQTT(PubSubClient &client, const char* humTopic, const char* bklcm
   }
 }
 
+void initMQTT(PubSubClient &client) {
+
+  client.setServer(MQTT_SERVER, 1883);
+  reconnectMQTT(client);
+}
+
 void pushToHA(PubSubClient &client, float temperature, float pressure) {
   
   char buffer[256];
@@ -111,7 +117,7 @@ void pushToHA(PubSubClient &client, float temperature, float pressure) {
   client.publish(sensorstateTopic, buffer);
 }
 
-void backlightToggle(PubSubClient &client, const char* topic, String state) {
+void backlightToggle(PubSubClient &client, String state) {
 
   if (state == "ON") {
     digitalWrite(TFT_BL, HIGH);
@@ -119,5 +125,5 @@ void backlightToggle(PubSubClient &client, const char* topic, String state) {
   if (state == "OFF") {
     digitalWrite(TFT_BL, LOW);
   }
-  client.publish(topic, state.c_str());
+  client.publish(bklstateTopic, state.c_str());
 }

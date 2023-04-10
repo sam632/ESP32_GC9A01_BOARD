@@ -5,10 +5,11 @@
 #define BMP280_I2C 0x76
 
 void initBMP(TwoWire &I2CBME, Adafruit_BMP280 &bmp) {
+
   I2CBME.begin(38, 39);
-  unsigned status;
-  status = bmp.begin(BMP280_I2C);
-    /* Default settings from the datasheet. */
+  bmp.begin(BMP280_I2C);
+
+  /* Default settings from the datasheet. */
   bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
                   Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
                   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */

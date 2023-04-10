@@ -41,15 +41,8 @@ void MQTTcallback(char* topic, byte* payload, unsigned int length) {
     updateHumidity(humSprite, message);
   }
   if (strcmp(topic, bklcmdTopic) == 0) {
-    backlightToggle(client, bklstateTopic, message);
+    backlightToggle(client, message);
   }
-}
-
-void initMQTT(PubSubClient &client, const char* humTopic, const char* bklcmdTopic) {
-
-  client.setServer(MQTT_SERVER, 1883);
-  client.setCallback(MQTTcallback);
-  reconnectMQTT(client, humTopic, bklcmdTopic);
 }
 
 void setup(void) {
@@ -62,14 +55,16 @@ void setup(void) {
   tft.fillScreen(BACKGROUND);
 
   initWiFi();
-  initMQTT(client, humTopic, bklcmdTopic);
+  initMQTT(client);
   initOTA();
   initBMP(I2CBME, bmp);
+
+  client.setCallback(MQTTcallback);
 
   configTime(GMT_OFFSET, DAYLIGHT_OFFSET, NTP_SERVER);
 
   pinMode(TFT_BL, OUTPUT);
-  backlightToggle(client, bklstateTopic, "ON");
+  backlightToggle(client, "ON");
   initDisplay(background, arcSprite, timeSprite, tempSprite, humSprite);
 }
 
@@ -77,7 +72,7 @@ void loop() {
 
   ArduinoOTA.handle();
   if (!client.connected()) {
-    reconnectMQTT(client, humTopic, bklcmdTopic);
+    reconnectMQTT(client);
   }
   client.loop();
 
