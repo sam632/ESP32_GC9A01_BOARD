@@ -6,7 +6,8 @@
 const char* humTopic         = "multi-sensor/sensor/multi_sensor_humidity/state";
 const char* bklstateTopic    = "homeassistant/switch/lcd_display_backlight/state";
 const char* bklcmdTopic      = "homeassistant/switch/lcd_display_backlight/set";
-const char* sensorstateTopic = "homeassistant/sensor/lcd_display_sensor/state";
+const char* sensorstateTopic = "lcd_display/sensor/lcd_display_sensor/state";
+const char* availabilityTopic = "lcd_display/status";
 
 void initWiFi() {
 
@@ -36,11 +37,22 @@ void sendMQTTDiscoveryMsg(PubSubClient &client, String name, String unit) {
 
   String topic = "homeassistant/sensor/" + name_string + "_" + type + "/config";
   
-  char buffer[256];
+  char buffer[1024];
   DynamicJsonDocument doc(1024);
 
   doc["name"] = String(DEVICE_NAME) + " " + name;
   doc["unique_id"] = name_string + "_" + type;
+
+  JsonObject availability  = doc.createNestedObject("availability");
+  availability["topic"] = availabilityTopic;
+  availability["value_template"] = "{{ value }}";
+  availability["payload_available"] = "online";
+  availability["payload_not_available"] = "offline";
+
+  JsonObject device  = doc.createNestedObject("device");
+  device["name"] = DEVICE_NAME;
+  device["manufacturer"] = "Sam Adamson";
+  device["identifiers"] = "LCDSAXX01";
   
   if(unit.length() == 0) {
     topic = "homeassistant/switch/" + name_string + "_" + type + "/config";
@@ -52,7 +64,7 @@ void sendMQTTDiscoveryMsg(PubSubClient &client, String name, String unit) {
     doc["device_class"] = type;
     doc["state_topic"] = sensorstateTopic;
     doc["unit_of_measurement"] = unit;
-    doc["value_template"] = "{{ value_json." + type + " }}";
+    doc["value_template"] = "{{ value_json." + type + " | round(1) }}";
   }
 
   size_t n = serializeJson(doc, buffer);
@@ -63,20 +75,22 @@ void reconnectMQTT(PubSubClient &client, const char* humTopic, const char* bklcm
 
   int i = 0;
   while (!client.connected()) {
-    // Create a random client ID
-    String clientId = "ESP32Client-";
-    clientId += String(random(0xffff), HEX);
+    String clientId = String(DEVICE_NAME);
+    clientId.toLowerCase();
+    clientId.replace(" ", "_");
+
     // Attempt to connect
-    if (client.connect(clientId.c_str(), MQTT_USER, MQTT_PASSWORD)) {
-      client.setBufferSize(512);
+    if (client.connect(clientId.c_str(), MQTT_USER, MQTT_PASSWORD, availabilityTopic, 1, true, "offline")) {
+      client.setBufferSize(1024);
       sendMQTTDiscoveryMsg(client, "Backlight", "");
       sendMQTTDiscoveryMsg(client, "Temperature", "°C");
       sendMQTTDiscoveryMsg(client, "Pressure", "hPa");
       client.subscribe(humTopic);
       client.subscribe(bklcmdTopic);
+      client.publish(availabilityTopic, "online", true);
     } else {
       i++;
-      delay(5000);
+      delay(3000);
     }
     if (i > 15) {
       ESP.restart();
@@ -87,9 +101,9 @@ void reconnectMQTT(PubSubClient &client, const char* humTopic, const char* bklcm
 void pushToHA(PubSubClient &client, float temperature, float pressure) {
   
   char buffer[256];
-  DynamicJsonDocument doc(1024);
+  DynamicJsonDocument doc(512);
 
-  doc["temperature"] = round(temperature*10) / 10.0;
+  doc["temperature"] = temperature;
   doc["pressure"] = round(pressure/10) / 10.0;
 
   size_t n = serializeJson(doc, buffer);

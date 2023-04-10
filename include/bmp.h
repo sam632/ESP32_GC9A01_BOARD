@@ -2,12 +2,12 @@
 #include <SPI.h>
 #include <Adafruit_BMP280.h>
 
-#define BMP280_ADDRESS 0x76
+#define BMP280_I2C 0x76
 
 void initBMP(TwoWire &I2CBME, Adafruit_BMP280 &bmp) {
   I2CBME.begin(38, 39);
   unsigned status;
-  status = bmp.begin(BMP280_ADDRESS);
+  status = bmp.begin(BMP280_I2C);
     /* Default settings from the datasheet. */
   bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
                   Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
