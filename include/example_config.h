@@ -1,12 +1,15 @@
 #pragma once
 
-#define DEVICE_NAME   "LCD Display"
-#define WIFI_SSID     "<WiFi-SSID>"
-#define WIFI_PASSWORD "<WiFi-PASSWORD>"
-#define MQTT_USER     "<MQTT-USERNAME>"
-#define MQTT_PASSWORD "<MQTT-PASSWORD>"
-#define MQTT_SERVER   "<MQTT-SERVER-IP>"
-#define OTA_PASSWORD  "<OTA-PASSWORD>"
+#define DEVICE_NAME     "LCD Display"
+#define WIFI_SSID       "<WiFi-SSID>"
+#define WIFI_PASSWORD   "<WiFi-PASSWORD>"
+#define MQTT_USER       "<MQTT-USERNAME>"
+#define MQTT_PASSWORD   "<MQTT-PASSWORD>"
+#define MQTT_SERVER     "<MQTT-SERVER-IP>"
+#define NTP_SERVER      "pool.ntp.org"
+#define GMT_OFFSET      0
+#define DAYLIGHT_OFFSET 3600
+#define OTA_PASSWORD    "<OTA-PASSWORD>"
 
 #define IWIDTH  240
 #define IHEIGHT 240
