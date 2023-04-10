@@ -1,2 +1,0 @@
-If you're using the ESP32 S3 N16R8 and don't have the baord in PlatformIO, you can add the board config in this 
-folder to your `.platformio/platforms/espressif32/boards` folder.
