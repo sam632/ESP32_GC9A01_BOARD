@@ -51,7 +51,6 @@ void fillArc(TFT_eSprite &sprite, int x, int y, int start_angle, int seg_count, 
     if(i == start_angle + seg * seg_count - inc) {
       int xc = (x2 + x3) / 2;
       int yc = (y2 + y3) / 2;
-      // int rad = sqrt(pow(x2-xc,2) + pow(y2-yc,2));
       sprite.fillCircle(xc, yc, w / 2, colour);
     }
   }
@@ -108,7 +107,7 @@ void updateTempDial(TFT_eSprite &sprite, float temperature) {
 
 void updateTemp(TFT_eSprite &sprite, float temperature) {
 
-    sprite.fillSprite(TFT_TRANSPARENT);  // Clear
+    sprite.fillSprite(TFT_TRANSPARENT);
 
     sprite.setTextSize(1);
     sprite.setFreeFont(&Roboto_Black_50);
@@ -119,11 +118,11 @@ void updateTemp(TFT_eSprite &sprite, float temperature) {
 
 void updateHumidity(TFT_eSprite &sprite, String humidity) {
 
-    sprite.fillSprite(TFT_TRANSPARENT);  // Clear
+    sprite.fillSprite(TFT_TRANSPARENT);
 
     sprite.setTextSize(1);
     sprite.setFreeFont(&Roboto_Black_50);
-    sprite.setTextColor(TFT_RED, TFT_TRANSPARENT);
+    sprite.setTextColor(ALT_TEXT_COLOUR, TFT_TRANSPARENT);
     
     sprite.drawString(humidity + "%", 3, 0);
 }
