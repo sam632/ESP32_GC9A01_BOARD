@@ -55,11 +55,9 @@ void setup(void) {
   tft.fillScreen(BACKGROUND);
 
   initWiFi();
-  initMQTT(client);
+  initMQTT(client, MQTTcallback);
   initOTA();
   initBMP(I2CBME, bmp);
-
-  client.setCallback(MQTTcallback);
 
   configTime(GMT_OFFSET, DAYLIGHT_OFFSET, NTP_SERVER);
 

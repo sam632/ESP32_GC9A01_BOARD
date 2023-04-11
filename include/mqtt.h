@@ -98,9 +98,10 @@ void reconnectMQTT(PubSubClient &client) {
   }
 }
 
-void initMQTT(PubSubClient &client) {
+void initMQTT(PubSubClient &client, std::function<void (char*, byte*, unsigned int)> function) {
 
   client.setServer(MQTT_SERVER, 1883);
+  client.setCallback(function);
   reconnectMQTT(client);
 }
 
