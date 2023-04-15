@@ -82,7 +82,7 @@ void loop() {
 
     float temperature = bmp.readTemperature();
     updateTemp(tempSprite, temperature);
-    updateTempDial(arcSprite, temperature);
+    updateDial(arcSprite, temperature, 39.3);
     pushToHA(client, temperature, bmp.readPressure());
   }
 
