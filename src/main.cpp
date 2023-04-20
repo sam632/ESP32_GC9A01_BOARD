@@ -29,7 +29,7 @@ TFT_eSprite background = TFT_eSprite(&tft);
 
 // BMP280 Setup
 TwoWire I2CBME = TwoWire(0);
-Adafruit_BME280 bme(&I2CBME);
+Adafruit_BME280 bme;
 
 void MQTTcallback(char* topic, byte* payload, unsigned int length) {
 
