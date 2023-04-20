@@ -8,7 +8,7 @@
 #include "config.h"
 #include "lcd.h"
 #include "ota.h"
-#include "bmp.h"
+#include "bme.h"
 #include "mqtt.h"
 
 WiFiClient espClient;
@@ -29,7 +29,7 @@ TFT_eSprite background = TFT_eSprite(&tft);
 
 // BMP280 Setup
 TwoWire I2CBME = TwoWire(0);
-Adafruit_BMP280 bmp(&I2CBME);
+Adafruit_BME280 bme(&I2CBME);
 
 void MQTTcallback(char* topic, byte* payload, unsigned int length) {
 
@@ -57,7 +57,7 @@ void setup(void) {
   initWiFi();
   initMQTT(client, MQTTcallback);
   initOTA();
-  initBMP(I2CBME, bmp);
+  initBME(I2CBME, bme);
 
   configTime(GMT_OFFSET, DAYLIGHT_OFFSET, NTP_SERVER);
 
@@ -80,10 +80,10 @@ void loop() {
 
     updateTime(timeSprite);
 
-    float temperature = bmp.readTemperature();
+    float temperature = bme.readTemperature();
     updateTemp(tempSprite, temperature);
     updateDial(arcSprite, temperature, 39.3);
-    pushToHA(client, temperature, bmp.readPressure());
+    pushToHA(client, temperature, bme.readPressure());
   }
 
   updateScreen(background, arcSprite, timeSprite, tempSprite, humSprite);
