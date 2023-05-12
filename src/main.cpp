@@ -37,9 +37,6 @@ void MQTTcallback(char* topic, byte* payload, unsigned int length) {
   for (int i = 0; i < length; i++) {
     message += (char)payload[i];
   }
-  if (strcmp(topic, humTopic) == 0) {
-    updateHumidity(humSprite, message);
-  }
   if (strcmp(topic, bklcmdTopic) == 0) {
     backlightToggle(client, message);
   }
@@ -81,9 +78,11 @@ void loop() {
     updateTime(timeSprite);
 
     float temperature = bme.readTemperature();
+    float humidity = bme.readHumidity();
     updateTemp(tempSprite, temperature);
-    updateDial(arcSprite, temperature, 39.3);
-    pushToHA(client, temperature, bme.readPressure());
+    updateHumidity(humSprite, humidity);
+    updateDial(arcSprite, temperature, humidity);
+    pushToHA(client, temperature, humidity, bme.readPressure());
   }
 
   updateScreen(background, arcSprite, timeSprite, tempSprite, humSprite);

@@ -3,7 +3,6 @@
 #include <WiFi.h>
 
 // MQTT vars
-const char* humTopic         = "multi-sensor/sensor/multi_sensor_humidity/state";
 const char* bklstateTopic    = "homeassistant/switch/lcd_display_backlight/state";
 const char* bklcmdTopic      = "homeassistant/switch/lcd_display_backlight/set";
 const char* sensorstateTopic = "lcd_display/sensor/lcd_display_sensor/state";
@@ -84,8 +83,8 @@ void reconnectMQTT(PubSubClient &client) {
       client.setBufferSize(1024);
       sendMQTTDiscoveryMsg(client, "Backlight", "");
       sendMQTTDiscoveryMsg(client, "Temperature", "°C");
+      sendMQTTDiscoveryMsg(client, "Humidity", "%");
       sendMQTTDiscoveryMsg(client, "Pressure", "hPa");
-      client.subscribe(humTopic);
       client.subscribe(bklcmdTopic);
       client.publish(availabilityTopic, "online", true);
     } else {
@@ -105,12 +104,13 @@ void initMQTT(PubSubClient &client, std::function<void (char*, byte*, unsigned i
   reconnectMQTT(client);
 }
 
-void pushToHA(PubSubClient &client, float temperature, float pressure) {
+void pushToHA(PubSubClient &client, float temperature, float humidity, float pressure) {
   
   char buffer[256];
   DynamicJsonDocument doc(512);
 
   doc["temperature"] = temperature;
+  doc["humidity"] = humidity;
   doc["pressure"] = round(pressure/10) / 10.0;
 
   size_t n = serializeJson(doc, buffer);

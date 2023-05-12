@@ -120,7 +120,7 @@ void updateTemp(TFT_eSprite &sprite, float temperature) {
     sprite.drawString(String(temperature, 1), 3, 3);
 }
 
-void updateHumidity(TFT_eSprite &sprite, String humidity) {
+void updateHumidity(TFT_eSprite &sprite, float humidity) {
 
     sprite.fillSprite(TFT_TRANSPARENT);
 
@@ -128,7 +128,7 @@ void updateHumidity(TFT_eSprite &sprite, String humidity) {
     sprite.setFreeFont(&Roboto_Black_44);
     sprite.setTextColor(ALT_TEXT_COLOUR, TFT_TRANSPARENT);
     
-    sprite.drawString(humidity + "%", 3, 0);
+    sprite.drawString(String(humidity, 0) + "%", 3, 0);
 }
 
 void updateTime(TFT_eSprite &sprite) {
