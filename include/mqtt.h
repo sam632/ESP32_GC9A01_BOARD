@@ -3,7 +3,6 @@
 #include <WiFi.h>
 
 // MQTT vars
-const char* humTopic         = "multi-sensor/sensor/multi_sensor_humidity/state";
 const char* bklstateTopic    = "homeassistant/switch/lcd_display_backlight/state";
 const char* bklcmdTopic      = "homeassistant/switch/lcd_display_backlight/set";
 const char* sensorstateTopic = "lcd_display/sensor/lcd_display_sensor/state";
@@ -18,6 +17,9 @@ void initWiFi() {
 
   int i = 0;
   while (WiFi.status() != WL_CONNECTED) {
+    digitalWrite(LED_PIN, HIGH);
+    delay(1000);
+    digitalWrite(LED_PIN, LOW);
     delay(1000);
     i = i + 1;
     if (i > 15) {
@@ -71,7 +73,7 @@ void sendMQTTDiscoveryMsg(PubSubClient &client, String name, String unit) {
   client.publish(topic.c_str(), buffer, n);
 }
 
-void reconnectMQTT(PubSubClient &client, const char* humTopic, const char* bklcmdTopic) {
+void reconnectMQTT(PubSubClient &client) {
 
   int i = 0;
   while (!client.connected()) {
@@ -79,13 +81,17 @@ void reconnectMQTT(PubSubClient &client, const char* humTopic, const char* bklcm
     clientId.toLowerCase();
     clientId.replace(" ", "_");
 
+    digitalWrite(LED_PIN, HIGH);
+    delay(1000);
+    digitalWrite(LED_PIN, LOW);
+
     // Attempt to connect
     if (client.connect(clientId.c_str(), MQTT_USER, MQTT_PASSWORD, availabilityTopic, 1, true, "offline")) {
       client.setBufferSize(1024);
       sendMQTTDiscoveryMsg(client, "Backlight", "");
       sendMQTTDiscoveryMsg(client, "Temperature", "°C");
+      sendMQTTDiscoveryMsg(client, "Humidity", "%");
       sendMQTTDiscoveryMsg(client, "Pressure", "hPa");
-      client.subscribe(humTopic);
       client.subscribe(bklcmdTopic);
       client.publish(availabilityTopic, "online", true);
     } else {
@@ -98,12 +104,20 @@ void reconnectMQTT(PubSubClient &client, const char* humTopic, const char* bklcm
   }
 }
 
-void pushToHA(PubSubClient &client, float temperature, float pressure) {
+void initMQTT(PubSubClient &client, std::function<void (char*, byte*, unsigned int)> function) {
+
+  client.setServer(MQTT_SERVER, 1883);
+  client.setCallback(function);
+  reconnectMQTT(client);
+}
+
+void pushToHA(PubSubClient &client, float temperature, float humidity, float pressure) {
   
   char buffer[256];
   DynamicJsonDocument doc(512);
 
   doc["temperature"] = temperature;
+  doc["humidity"] = humidity;
   doc["pressure"] = round(pressure/10) / 10.0;
 
   size_t n = serializeJson(doc, buffer);
@@ -111,7 +125,7 @@ void pushToHA(PubSubClient &client, float temperature, float pressure) {
   client.publish(sensorstateTopic, buffer);
 }
 
-void backlightToggle(PubSubClient &client, const char* topic, String state) {
+void backlightToggle(PubSubClient &client, String state) {
 
   if (state == "ON") {
     digitalWrite(TFT_BL, HIGH);
@@ -119,5 +133,5 @@ void backlightToggle(PubSubClient &client, const char* topic, String state) {
   if (state == "OFF") {
     digitalWrite(TFT_BL, LOW);
   }
-  client.publish(topic, state.c_str());
+  client.publish(bklstateTopic, state.c_str());
 }

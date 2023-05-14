@@ -1,7 +1,11 @@
 #include <ArduinoOTA.h>
 
 void initOTA() {
-  ArduinoOTA.setHostname("lcd-display");
+  String host = String(DEVICE_NAME);
+  host.toLowerCase();
+  host.replace(" ", "_");
+
+  ArduinoOTA.setHostname(host.c_str());
   ArduinoOTA.setPassword(OTA_PASSWORD);
 
   ArduinoOTA

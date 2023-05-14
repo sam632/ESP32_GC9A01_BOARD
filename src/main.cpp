@@ -8,7 +8,7 @@
 #include "config.h"
 #include "lcd.h"
 #include "ota.h"
-#include "bmp.h"
+#include "bme.h"
 #include "mqtt.h"
 
 WiFiClient espClient;
@@ -29,7 +29,7 @@ TFT_eSprite background = TFT_eSprite(&tft);
 
 // BMP280 Setup
 TwoWire I2CBME = TwoWire(0);
-Adafruit_BMP280 bmp(&I2CBME);
+Adafruit_BME280 bme;
 
 void MQTTcallback(char* topic, byte* payload, unsigned int length) {
 
@@ -37,24 +37,17 @@ void MQTTcallback(char* topic, byte* payload, unsigned int length) {
   for (int i = 0; i < length; i++) {
     message += (char)payload[i];
   }
-  if (strcmp(topic, humTopic) == 0) {
-    updateHumidity(humSprite, message);
-  }
   if (strcmp(topic, bklcmdTopic) == 0) {
-    backlightToggle(client, bklstateTopic, message);
+    backlightToggle(client, message);
   }
-}
-
-void initMQTT(PubSubClient &client, const char* humTopic, const char* bklcmdTopic) {
-
-  client.setServer(MQTT_SERVER, 1883);
-  client.setCallback(MQTTcallback);
-  reconnectMQTT(client, humTopic, bklcmdTopic);
 }
 
 void setup(void) {
 
   Serial.begin(115200);
+  
+  pinMode(TFT_BL, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
 
   tft.init();
   tft.setRotation(0);
@@ -62,14 +55,13 @@ void setup(void) {
   tft.fillScreen(BACKGROUND);
 
   initWiFi();
-  initMQTT(client, humTopic, bklcmdTopic);
+  initMQTT(client, MQTTcallback);
   initOTA();
-  initBMP(I2CBME, bmp);
+  initBME(I2CBME, bme);
 
   configTime(GMT_OFFSET, DAYLIGHT_OFFSET, NTP_SERVER);
 
-  pinMode(TFT_BL, OUTPUT);
-  backlightToggle(client, bklstateTopic, "ON");
+  backlightToggle(client, "ON");
   initDisplay(background, arcSprite, timeSprite, tempSprite, humSprite);
 }
 
@@ -77,7 +69,7 @@ void loop() {
 
   ArduinoOTA.handle();
   if (!client.connected()) {
-    reconnectMQTT(client, humTopic, bklcmdTopic);
+    reconnectMQTT(client);
   }
   client.loop();
 
@@ -87,10 +79,12 @@ void loop() {
 
     updateTime(timeSprite);
 
-    float temperature = bmp.readTemperature();
+    float temperature = bme.readTemperature();
+    float humidity = bme.readHumidity();
     updateTemp(tempSprite, temperature);
-    updateTempDial(arcSprite, temperature);
-    pushToHA(client, temperature, bmp.readPressure());
+    updateHumidity(humSprite, humidity);
+    updateDial(arcSprite, temperature, humidity);
+    pushToHA(client, temperature, humidity, bme.readPressure());
   }
 
   updateScreen(background, arcSprite, timeSprite, tempSprite, humSprite);
