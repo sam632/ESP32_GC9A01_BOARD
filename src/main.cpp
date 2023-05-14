@@ -1,8 +1,3 @@
-/*
-  - Home Assistant send unavailble
-  - Refactor
-*/
-
 #include <Arduino.h>
 
 #include "config.h"
