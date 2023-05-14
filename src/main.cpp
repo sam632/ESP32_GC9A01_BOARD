@@ -45,6 +45,9 @@ void MQTTcallback(char* topic, byte* payload, unsigned int length) {
 void setup(void) {
 
   Serial.begin(115200);
+  
+  pinMode(TFT_BL, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
 
   tft.init();
   tft.setRotation(0);
@@ -58,7 +61,6 @@ void setup(void) {
 
   configTime(GMT_OFFSET, DAYLIGHT_OFFSET, NTP_SERVER);
 
-  pinMode(TFT_BL, OUTPUT);
   backlightToggle(client, "ON");
   initDisplay(background, arcSprite, timeSprite, tempSprite, humSprite);
 }

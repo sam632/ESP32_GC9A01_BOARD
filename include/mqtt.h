@@ -17,6 +17,9 @@ void initWiFi() {
 
   int i = 0;
   while (WiFi.status() != WL_CONNECTED) {
+    digitalWrite(LED_PIN, HIGH);
+    delay(1000);
+    digitalWrite(LED_PIN, LOW);
     delay(1000);
     i = i + 1;
     if (i > 15) {
@@ -77,6 +80,10 @@ void reconnectMQTT(PubSubClient &client) {
     String clientId = String(DEVICE_NAME);
     clientId.toLowerCase();
     clientId.replace(" ", "_");
+
+    digitalWrite(LED_PIN, HIGH);
+    delay(1000);
+    digitalWrite(LED_PIN, LOW);
 
     // Attempt to connect
     if (client.connect(clientId.c_str(), MQTT_USER, MQTT_PASSWORD, availabilityTopic, 1, true, "offline")) {
