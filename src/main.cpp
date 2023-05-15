@@ -6,6 +6,7 @@
 #include "bme.h"
 #include "mqtt.h"
 
+// WiFi & MQTT Setup
 WiFiClient espClient;
 PubSubClient client(espClient);
 unsigned long lastMsg = 0;
