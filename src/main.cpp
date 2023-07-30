@@ -3,7 +3,7 @@
 #include "config.h"
 #include "lcd.h"
 #include "ota.h"
-#include "bme.h"
+#include "i2c.h"
 #include "mqtt.h"
 
 // WiFi & MQTT Setup
@@ -23,9 +23,10 @@ TFT_eSprite timeSprite = TFT_eSprite(&tft);
 TFT_eSprite arcSprite = TFT_eSprite(&tft);
 TFT_eSprite background = TFT_eSprite(&tft);
 
-// BMP280 Setup
-TwoWire I2CBME = TwoWire(0);
+// I2C Setup
+TwoWire I2C = TwoWire(0);
 Adafruit_BME280 bme;
+BH1750 bh1750;
 
 void MQTTcallback(char* topic, byte* payload, unsigned int length) {
 
@@ -53,7 +54,9 @@ void setup(void) {
   initWiFi();
   initMQTT(client, MQTTcallback);
   initOTA();
-  initBME(I2CBME, bme);
+  I2C.begin(38, 39);
+  initBME(I2C, bme);
+  initBH1750(I2C, bh1750);
 
   configTime(GMT_OFFSET, DAYLIGHT_OFFSET, NTP_SERVER);
 
@@ -77,10 +80,11 @@ void loop() {
 
     float temperature = bme.readTemperature();
     float humidity = bme.readHumidity();
+
     updateTemp(tempSprite, temperature);
     updateHumidity(humSprite, humidity);
     updateDial(arcSprite, temperature, humidity);
-    pushToHA(client, temperature, humidity, bme.readPressure());
+    pushToHA(client, temperature, humidity, bme.readPressure(), bh1750.readLightLevel());
   }
 
   updateScreen(background, arcSprite, timeSprite, tempSprite, humSprite);

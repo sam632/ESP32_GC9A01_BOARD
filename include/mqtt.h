@@ -92,6 +92,7 @@ void reconnectMQTT(PubSubClient &client) {
       sendMQTTDiscoveryMsg(client, "Temperature", "°C");
       sendMQTTDiscoveryMsg(client, "Humidity", "%");
       sendMQTTDiscoveryMsg(client, "Pressure", "hPa");
+      sendMQTTDiscoveryMsg(client, "Illuminance", "lx");
       client.subscribe(bklcmdTopic);
       client.publish(availabilityTopic, "online", true);
     } else {
@@ -111,7 +112,7 @@ void initMQTT(PubSubClient &client, std::function<void (char*, byte*, unsigned i
   reconnectMQTT(client);
 }
 
-void pushToHA(PubSubClient &client, float temperature, float humidity, float pressure) {
+void pushToHA(PubSubClient &client, float temperature, float humidity, float pressure, float illuminance) {
   
   char buffer[256];
   DynamicJsonDocument doc(512);
@@ -119,6 +120,7 @@ void pushToHA(PubSubClient &client, float temperature, float humidity, float pre
   doc["temperature"] = temperature;
   doc["humidity"] = humidity;
   doc["pressure"] = round(pressure/10) / 10.0;
+  doc["illuminance"] = illuminance;
 
   size_t n = serializeJson(doc, buffer);
 
